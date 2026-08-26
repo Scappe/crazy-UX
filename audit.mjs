@@ -1,129 +1,69 @@
 import { chromium } from 'playwright';
 import fs from 'node:fs';
 import path from 'node:path';
-import { PNG } from 'pngjs';
-import pixelmatch from 'pixelmatch';
 
 const OUT = path.resolve('audit-artifacts');
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
-const targets = { reference: 'https://unseen.co/', clone: 'http://127.0.0.1:4173/' };
-const viewports = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 844 } };
-
-async function isInteractable(locator) {
-  return locator.evaluate(el => {
-    const s = getComputedStyle(el);
-    const r = el.getBoundingClientRect();
-    return s.display !== 'none' && s.visibility !== 'hidden' && s.pointerEvents !== 'none' && Number(s.opacity || 1) > .55 && r.width > 2 && r.height > 2;
-  }).catch(() => false);
-}
-
-async function findInteractableText(page, text, timeout = 12000) {
-  const end = Date.now() + timeout;
-  while (Date.now() < end) {
-    const loc = page.getByText(text, { exact: true });
-    const count = await loc.count();
-    for (let i = count - 1; i >= 0; i--) {
-      const n = loc.nth(i);
-      if (await isInteractable(n)) return n;
-    }
-    await page.waitForTimeout(120);
-  }
-  return null;
-}
-
-async function shot(page, name) {
-  await page.screenshot({ path: path.join(OUT, `${name}.png`), fullPage: false, animations: 'allow', timeout: 8000 });
-}
-
-async function clickMenu(page) {
-  const candidates = [page.getByRole('button', { name: 'Toggle Menu', exact: true }), page.getByText('Toggle Menu', { exact: true })];
-  for (const loc of candidates) {
-    for (let i = 0; i < await loc.count(); i++) {
-      const n = loc.nth(i);
-      if (await n.isVisible().catch(() => false)) {
-        await n.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
-        return;
-      }
-    }
-  }
-}
-
-async function auditOne(browser, kind, viewportName) {
-  const viewport = viewports[viewportName];
-  const context = await browser.newContext({ viewport, deviceScaleFactor: 1, locale: 'en-GB' });
-  const page = await context.newPage();
-  page.setDefaultTimeout(3500);
-  page.setDefaultNavigationTimeout(15000);
-  page.on('pageerror', e => fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] ${e.message}\n`));
-  page.on('console', m => { if (m.type() === 'error') fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] console: ${m.text()}\n`); });
-
-  try { await page.goto(targets[kind], { waitUntil: 'domcontentloaded', timeout: 15000 }); }
-  catch (e) { fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] goto: ${e.message}\n`); }
-
-  await page.waitForTimeout(1000);
-  await shot(page, `${kind}-${viewportName}-loader-1s`);
-  await page.waitForTimeout(1500);
-  await shot(page, `${kind}-${viewportName}-loader-2_5s`);
-
-  let enter = await findInteractableText(page, 'Enter without audio', 10000);
-  if (!enter) enter = await findInteractableText(page, 'Enter', 3500);
-  await shot(page, `${kind}-${viewportName}-ready`);
-
-  if (enter) {
-    await enter.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
-  } else {
-    // The live site's WebGL overlay can make its visible entry control fail DOM
-    // hit-testing in desktop Chromium. Click the visually measured centre as a
-    // deterministic fallback so the audit still reaches the actual home scene.
-    await page.mouse.click(Math.round(viewport.width * .5), Math.round(viewport.height * .577));
-    fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] used coordinate entry fallback\n`);
-  }
-
-  await page.waitForTimeout(2800);
-  await shot(page, `${kind}-${viewportName}-world`);
-
-  const x1 = Math.round(viewport.width * .40), y1 = Math.round(viewport.height * .50);
-  const x2 = Math.round(viewport.width * .61), y2 = Math.round(viewport.height * .43);
-  await page.mouse.move(x1, y1); await page.mouse.down(); await page.mouse.move(x2, y2, { steps: 14 }); await page.mouse.up();
-  await page.waitForTimeout(650);
-  await shot(page, `${kind}-${viewportName}-dragged`);
-
-  await clickMenu(page);
-  await page.waitForTimeout(1150);
-  await shot(page, `${kind}-${viewportName}-menu`);
-  await context.close();
-}
-
-function compare(refPath, clonePath, diffPath) {
-  const ref = PNG.sync.read(fs.readFileSync(refPath));
-  const clone = PNG.sync.read(fs.readFileSync(clonePath));
-  if (ref.width !== clone.width || ref.height !== clone.height) return { comparable: false, reason: 'dimension mismatch' };
-  const diff = new PNG({ width: ref.width, height: ref.height });
-  const pixels = pixelmatch(ref.data, clone.data, diff.data, ref.width, ref.height, { threshold: .12, includeAA: false, alpha: .6 });
-  fs.writeFileSync(diffPath, PNG.sync.write(diff));
-  return { comparable: true, mismatchPixels: pixels, totalPixels: ref.width * ref.height, mismatchPercent: +(pixels / (ref.width * ref.height) * 100).toFixed(3) };
-}
-
 const browser = await chromium.launch({ headless: true, args: ['--disable-dev-shm-usage'] });
-for (const viewportName of Object.keys(viewports)) {
-  for (const kind of ['reference', 'clone']) {
-    try { await auditOne(browser, kind, viewportName); }
-    catch (e) { fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] fatal: ${e.stack || e.message}\n`); }
-  }
-}
-await browser.close();
+const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, locale: 'en-GB' });
+const page = await context.newPage();
+page.setDefaultTimeout(5000);
+const assets = [];
+page.on('response', async response => {
+  try {
+    const type = response.request().resourceType();
+    const ct = response.headers()['content-type'] || '';
+    if (['image','media','font','stylesheet'].includes(type) || /image|video|font|css/.test(ct)) {
+      assets.push({ url: response.url(), type, contentType: ct, status: response.status() });
+    }
+  } catch {}
+});
+page.on('pageerror', e => fs.appendFileSync(path.join(OUT, 'errors.log'), `PAGEERROR ${e.message}\n`));
 
-const report = { generatedAt: new Date().toISOString(), comparisons: {} };
-for (const viewportName of Object.keys(viewports)) {
-  for (const state of ['loader-1s','loader-2_5s','ready','world','dragged','menu']) {
-    const r = path.join(OUT, `reference-${viewportName}-${state}.png`), c = path.join(OUT, `clone-${viewportName}-${state}.png`);
-    const key = `${viewportName}-${state}`;
-    report.comparisons[key] = fs.existsSync(r) && fs.existsSync(c)
-      ? compare(r, c, path.join(OUT, `diff-${key}.png`))
-      : { comparable: false, reason: 'missing screenshot' };
-  }
-}
-fs.writeFileSync(path.join(OUT, 'report.json'), JSON.stringify(report, null, 2));
-console.log(JSON.stringify(report, null, 2));
+await page.goto('https://unseen.co/', { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(e => fs.appendFileSync(path.join(OUT, 'errors.log'), `goto ${e.message}\n`));
+await page.waitForTimeout(7200);
+await page.screenshot({ path: path.join(OUT, 'reference-desktop-ready.png'), animations: 'disabled', timeout: 20000 });
+
+// Enter button is consistently centred at ~57.7% viewport height on the live entry.
+await page.mouse.click(720, 519);
+await page.waitForTimeout(3200);
+await page.screenshot({ path: path.join(OUT, 'reference-desktop-world.png'), animations: 'disabled', timeout: 20000 });
+
+const dump = await page.evaluate(() => {
+  const interesting = [...document.querySelectorAll('button,a,h1,h2,p,canvas,img,video')].map(el => {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    return {
+      tag: el.tagName,
+      text: (el.textContent || '').trim().replace(/\s+/g,' ').slice(0,160),
+      className: typeof el.className === 'string' ? el.className : '',
+      id: el.id || '',
+      x: +r.x.toFixed(1), y: +r.y.toFixed(1), width: +r.width.toFixed(1), height: +r.height.toFixed(1),
+      display: s.display, visibility: s.visibility, opacity: s.opacity,
+      fontFamily: s.fontFamily, fontSize: s.fontSize, fontWeight: s.fontWeight,
+      lineHeight: s.lineHeight, letterSpacing: s.letterSpacing,
+      color: s.color, background: s.backgroundColor,
+      src: el.currentSrc || el.src || el.href || ''
+    };
+  }).filter(x => x.width > 0 && x.height > 0);
+  return { title: document.title, bodyClass: document.body.className, interesting };
+});
+fs.writeFileSync(path.join(OUT, 'dom-world.json'), JSON.stringify(dump, null, 2));
+fs.writeFileSync(path.join(OUT, 'assets.json'), JSON.stringify([...new Map(assets.map(x => [x.url,x])).values()], null, 2));
+
+// Open menu using its semantic control, with coordinate fallback.
+let menu = page.getByText('Toggle Menu', { exact: true });
+if (await menu.count()) await menu.first().click({ force: true, noWaitAfter: true }).catch(() => page.mouse.click(1380, 40));
+else await page.mouse.click(1380, 40);
+await page.waitForTimeout(1400);
+await page.screenshot({ path: path.join(OUT, 'reference-desktop-menu.png'), animations: 'disabled', timeout: 20000 });
+const menuDump = await page.evaluate(() => [...document.querySelectorAll('button,a')].map(el => {
+  const r=el.getBoundingClientRect(),s=getComputedStyle(el); return {text:(el.textContent||'').trim().replace(/\s+/g,' '),className:typeof el.className==='string'?el.className:'',x:r.x,y:r.y,width:r.width,height:r.height,fontFamily:s.fontFamily,fontSize:s.fontSize,color:s.color,opacity:s.opacity,display:s.display};
+}).filter(x=>x.width>0&&x.height>0));
+fs.writeFileSync(path.join(OUT, 'dom-menu.json'), JSON.stringify(menuDump, null, 2));
+
+await context.close();
+await browser.close();
+console.log(`captured ${assets.length} media/font/css responses`);
