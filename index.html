@@ -3,10 +3,32 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#050505">
+  <meta name="theme-color" content="#f0dfdb">
   <meta name="description" content="Independent motion and interaction study.">
   <title>Unseen — Interaction Study</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    .intro{display:block;background:#f0dfdb;color:#111}
+    .intro>.wordmark,.intro>.intro-copy{transition:opacity .45s ease}
+    .intro-letters{position:absolute;left:var(--pad);right:var(--pad);top:50%;transform:translateY(-50%) scaleX(.955);transition:opacity .62s ease,transform .8s var(--ease)}
+    .intro-progress,.intro-loading{transition:opacity .35s ease}
+    .intro-ready{position:absolute;left:50%;top:50%;width:min(330px,78vw);transform:translate(-50%,-48%) scale(.96);text-align:center;opacity:0;pointer-events:none;transition:opacity .65s ease .08s,transform .9s var(--ease-out) .08s}
+    .intro-ready .wordmark{font-size:10px;letter-spacing:-.04em;margin:11px 0 7px}
+    .intro-ready p{font-size:8px;line-height:1.12;margin:0 auto 18px;max-width:245px;letter-spacing:-.025em}
+    .eyes{display:flex;align-items:center;justify-content:center;margin:0 auto;width:72px;height:52px}
+    .eye{position:relative;width:35px;height:47px;border:1.7px solid #111;border-radius:52% 48% 52% 48%;background:#fff;overflow:hidden}
+    .eye:first-child{transform:rotate(-7deg) translateX(2px)}.eye:last-child{transform:rotate(7deg) translateX(-2px)}
+    .eye i{position:absolute;width:17px;height:25px;border-radius:50%;background:#050505;left:50%;top:50%;transform:translate(-38%,-48%)}
+    .eye i:after{content:"";position:absolute;width:5px;height:8px;border-radius:50%;background:#fff;left:3px;top:3px}
+    .intro-enter{display:inline-flex;align-items:center;gap:6px;background:#fff;color:#111;border:0;box-shadow:0 2px 8px rgba(0,0,0,.08);min-width:0;padding:8px 14px;font-size:8px}
+    .intro-silent{position:absolute;left:50%;bottom:6.6%;transform:translateX(-50%);font-size:7px;text-transform:uppercase;padding-bottom:2px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .5s ease .22s}
+    .intro.is-loaded>.wordmark,.intro.is-loaded>.intro-copy,.intro.is-loaded .intro-letters,.intro.is-loaded .intro-progress,.intro.is-loaded .intro-loading{opacity:0;pointer-events:none}
+    .intro.is-loaded .intro-letters{transform:translateY(-50%) scaleX(.955) scale(.97)}
+    .intro.is-loaded .intro-ready{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
+    .intro.is-loaded .intro-silent{opacity:1;pointer-events:auto}
+    .hold-overlay{pointer-events:none}
+    @media(max-width:800px){.intro-letters{left:18px;right:18px;width:auto;margin:0;font-size:18.5vw}.intro-ready{top:48%}.intro-silent{bottom:5.5%}.intro>.intro-copy{margin-top:58px}.eyes{transform:scale(.94)}}
+  </style>
 </head>
 <body>
   <div class="grain" aria-hidden="true"></div>
@@ -21,13 +43,16 @@
     <div class="intro-letters" aria-hidden="true">
       <span>U</span><span>N</span><span>S</span><span>E</span><span>E</span><span>N</span>
     </div>
-
     <div class="intro-progress" aria-hidden="true"><i></i></div>
-    <div class="intro-actions">
-      <button class="pill" id="enter">Enter</button>
-      <button class="text-link" id="silent">Enter without audio</button>
-    </div>
     <div class="intro-loading">(Loading)</div>
+
+    <div class="intro-ready">
+      <div class="eyes" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
+      <div class="wordmark">UNSEEN STUDIO®</div>
+      <p>A brand, digital and motion studio creating<br>refreshingly unexpected ideas and striking visuals<br>that help bold brands cut through the noise.</p>
+      <button class="pill intro-enter" id="enter">Enter <span>↘</span></button>
+    </div>
+    <button class="text-link intro-silent" id="silent">Enter without audio</button>
   </section>
 
   <main class="app" id="app" aria-hidden="true">
@@ -58,49 +83,25 @@
       <div class="world-title"><em>UN</em>SEEN</div>
 
       <div class="orbit" id="orbit">
-        <article class="card card-a" data-title="Soft Machines" data-type="Digital">
-          <div class="card-art art-a"></div><span class="card-index">01</span>
-        </article>
-        <article class="card card-b" data-title="Otherworld" data-type="Motion">
-          <div class="card-art art-b"></div><span class="card-index">02</span>
-        </article>
-        <article class="card card-c" data-title="Form State" data-type="Branding">
-          <div class="card-art art-c"><strong>FORM<br>STATE</strong></div><span class="card-index">03</span>
-        </article>
-        <article class="card card-d" data-title="Future Matter" data-type="Experiment">
-          <div class="card-art art-d"></div><span class="card-index">04</span>
-        </article>
-        <article class="card card-e" data-title="No Signal" data-type="Digital">
-          <div class="card-art art-e"><strong>NO<br>SIGNAL</strong></div><span class="card-index">05</span>
-        </article>
+        <article class="card card-a" data-title="Soft Machines" data-type="Digital"><div class="card-art art-a"></div><span class="card-index">01</span></article>
+        <article class="card card-b" data-title="Otherworld" data-type="Motion"><div class="card-art art-b"></div><span class="card-index">02</span></article>
+        <article class="card card-c" data-title="Form State" data-type="Branding"><div class="card-art art-c"><strong>FORM<br>STATE</strong></div><span class="card-index">03</span></article>
+        <article class="card card-d" data-title="Future Matter" data-type="Experiment"><div class="card-art art-d"></div><span class="card-index">04</span></article>
+        <article class="card card-e" data-title="No Signal" data-type="Digital"><div class="card-art art-e"><strong>NO<br>SIGNAL</strong></div><span class="card-index">05</span></article>
       </div>
 
-      <div class="drag-hint micro" id="dragHint">
-        <span class="drag-icon" aria-hidden="true"><i></i></span>
-        <p>Drag to explore our world</p>
-      </div>
+      <div class="drag-hint micro" id="dragHint"><span class="drag-icon" aria-hidden="true"><i></i></span><p>Drag to explore our world</p></div>
       <button class="work-link mag" data-view="projects">View our work ↗</button>
-
-      <div class="card-meta" id="cardMeta">
-        <small>Selected project</small>
-        <h2>Soft Machines</h2>
-        <span>Digital</span>
-      </div>
+      <div class="card-meta" id="cardMeta"><small>Selected project</small><h2>Soft Machines</h2><span>Digital</span></div>
     </section>
 
     <section class="projects view" data-name="projects" aria-label="Selected Projects">
       <div class="projects-head">
-        <p class="micro">Selected Projects</p>
-        <h1>Projects</h1>
+        <p class="micro">Selected Projects</p><h1>Projects</h1>
         <div class="filters" aria-label="Filter projects">
-          <button class="is-active" data-filter="all">All</button>
-          <button data-filter="branding">Branding</button>
-          <button data-filter="digital">Digital</button>
-          <button data-filter="motion">Motion</button>
-          <button data-filter="experiment">Experiment</button>
+          <button class="is-active" data-filter="all">All</button><button data-filter="branding">Branding</button><button data-filter="digital">Digital</button><button data-filter="motion">Motion</button><button data-filter="experiment">Experiment</button>
         </div>
       </div>
-
       <div class="project-list">
         <a href="#" class="project-row" data-kind="digital"><span class="index">01</span><span class="name">Soft Machines</span><span class="kind">Digital</span><span class="arrow">↗</span><i class="preview preview-a"></i></a>
         <a href="#" class="project-row" data-kind="motion"><span class="index">02</span><span class="name">Otherworld</span><span class="kind">Motion</span><span class="arrow">↗</span><i class="preview preview-b"></i></a>
@@ -113,44 +114,20 @@
 
     <section class="contact view" data-name="contact" aria-label="Contact">
       <div class="contact-grid"></div>
-      <div class="contact-main">
-        <span class="micro">Say hello</span>
-        <h1><em>we look forward</em><br>to hearing from you</h1>
-        <div class="contact-actions">
-          <a class="pill primary mag" href="mailto:projects@unseen.co">New Business ↗</a>
-          <a class="pill secondary mag" href="mailto:hello@unseen.co">General ↗</a>
-        </div>
-      </div>
-      <div class="contact-details">
-        <div><small>Bristol</small><p>35a Colston Avenue<br>Bristol, BS1 4TT</p></div>
-        <div><small>London</small><p>90 Paul Street<br>London, EC2A 4NE</p></div>
-      </div>
+      <div class="contact-main"><span class="micro">Say hello</span><h1><em>we look forward</em><br>to hearing from you</h1><div class="contact-actions"><a class="pill primary mag" href="mailto:projects@unseen.co">New Business ↗</a><a class="pill secondary mag" href="mailto:hello@unseen.co">General ↗</a></div></div>
+      <div class="contact-details"><div><small>Bristol</small><p>35a Colston Avenue<br>Bristol, BS1 4TT</p></div><div><small>London</small><p>90 Paul Street<br>London, EC2A 4NE</p></div></div>
     </section>
 
     <nav class="menu" id="menu" aria-hidden="true">
       <div class="menu-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <div class="menu-inner">
-        <span class="micro">Explore</span>
-        <button class="menu-link" data-view="home"><sup>01</sup><span>Index</span></button>
-        <button class="menu-link" data-view="projects"><sup>02</sup><span>Projects</span></button>
-        <button class="menu-link" data-view="contact"><sup>03</sup><span>Contact</span></button>
-        <button class="menu-link" data-view="home"><sup>04</sup><span>World</span></button>
-      </div>
+      <div class="menu-inner"><span class="micro">Explore</span><button class="menu-link" data-view="home"><sup>01</sup><span>Index</span></button><button class="menu-link" data-view="projects"><sup>02</sup><span>Projects</span></button><button class="menu-link" data-view="contact"><sup>03</sup><span>Contact</span></button><button class="menu-link" data-view="home"><sup>04</sup><span>World</span></button></div>
       <div class="menu-foot micro"><span>Brand · Digital · Motion</span><span>Interaction study</span></div>
     </nav>
 
-    <div class="hold-overlay" id="holdOverlay" aria-hidden="true">
-      <div class="hold-ring">
-        <svg viewBox="0 0 100 100" aria-hidden="true">
-          <circle cx="50" cy="50" r="46"></circle>
-          <circle class="progress" cx="50" cy="50" r="46"></circle>
-        </svg>
-        <span>Hold</span>
-      </div>
-      <p class="hold-copy micro">Keep holding to enter</p>
-    </div>
+    <div class="hold-overlay" id="holdOverlay" aria-hidden="true"><div class="hold-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46"></circle><circle class="progress" cx="50" cy="50" r="46"></circle></svg><span>Hold</span></div><p class="hold-copy micro">Keep holding to enter</p></div>
   </main>
 
+  <script>setTimeout(()=>document.getElementById('intro')?.classList.add('is-loaded'),1580);</script>
   <script src="./app.js" defer></script>
 </body>
 </html>
