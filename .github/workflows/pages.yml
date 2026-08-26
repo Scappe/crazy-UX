@@ -1,8 +1,6 @@
 name: Visual reference audit
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -10,27 +8,7 @@ permissions:
 
 jobs:
   audit:
+    if: ${{ false }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install dependencies
-        run: npm install --no-audit --no-fund
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Start local clone
-        run: |
-          python3 -m http.server 4173 --bind 127.0.0.1 > /tmp/crazyux-http.log 2>&1 &
-          sleep 2
-      - name: Run visual audit
-        run: npm run audit
-      - name: Upload audit artifact
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: visual-audit
-          path: audit-artifacts
-          retention-days: 3
+      - run: echo "Disabled to preserve GitHub Actions minutes"
