@@ -11,20 +11,43 @@ fs.mkdirSync(OUT, { recursive: true });
 const targets = { reference: 'https://unseen.co/', clone: 'http://127.0.0.1:4173/' };
 const viewports = { desktop: { width: 1440, height: 900 }, mobile: { width: 390, height: 844 } };
 
-async function clickVisible(page, text) {
-  const loc = page.getByText(text, { exact: true });
-  for (let i = (await loc.count()) - 1; i >= 0; i--) {
-    const n = loc.nth(i);
-    if (await n.isVisible().catch(() => false)) {
-      await n.click({ timeout: 3500, noWaitAfter: true }).catch(() => {});
-      return true;
+async function isInteractable(locator) {
+  return locator.evaluate(el => {
+    const s = getComputedStyle(el);
+    const r = el.getBoundingClientRect();
+    return s.display !== 'none' && s.visibility !== 'hidden' && s.pointerEvents !== 'none' && Number(s.opacity || 1) > .55 && r.width > 2 && r.height > 2;
+  }).catch(() => false);
+}
+
+async function findInteractableText(page, text, timeout = 12000) {
+  const end = Date.now() + timeout;
+  while (Date.now() < end) {
+    const loc = page.getByText(text, { exact: true });
+    const count = await loc.count();
+    for (let i = count - 1; i >= 0; i--) {
+      const n = loc.nth(i);
+      if (await isInteractable(n)) return n;
     }
+    await page.waitForTimeout(120);
   }
-  return false;
+  return null;
 }
 
 async function shot(page, name) {
-  await page.screenshot({ path: path.join(OUT, `${name}.png`), fullPage: false, animations: 'disabled', timeout: 7000 });
+  await page.screenshot({ path: path.join(OUT, `${name}.png`), fullPage: false, animations: 'allow', timeout: 8000 });
+}
+
+async function clickMenu(page) {
+  const candidates = [page.getByRole('button', { name: 'Toggle Menu', exact: true }), page.getByText('Toggle Menu', { exact: true })];
+  for (const loc of candidates) {
+    for (let i = 0; i < await loc.count(); i++) {
+      const n = loc.nth(i);
+      if (await n.isVisible().catch(() => false)) {
+        await n.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
+        return;
+      }
+    }
+  }
 }
 
 async function auditOne(browser, kind, viewportName) {
@@ -39,22 +62,29 @@ async function auditOne(browser, kind, viewportName) {
   try { await page.goto(targets[kind], { waitUntil: 'domcontentloaded', timeout: 15000 }); }
   catch (e) { fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] goto: ${e.message}\n`); }
 
-  await page.waitForTimeout(2400);
-  await shot(page, `${kind}-${viewportName}-intro`);
+  await page.waitForTimeout(1000);
+  await shot(page, `${kind}-${viewportName}-loader-1s`);
+  await page.waitForTimeout(1500);
+  await shot(page, `${kind}-${viewportName}-loader-2_5s`);
 
-  let entered = await clickVisible(page, 'Enter without audio');
-  if (!entered) entered = await clickVisible(page, 'Enter');
-  await page.waitForTimeout(2100);
+  let enter = await findInteractableText(page, 'Enter without audio', 10000);
+  if (!enter) enter = await findInteractableText(page, 'Enter', 3500);
+  await shot(page, `${kind}-${viewportName}-ready`);
+
+  if (enter) await enter.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
+  else fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] entry control not interactable\n`);
+
+  await page.waitForTimeout(2800);
   await shot(page, `${kind}-${viewportName}-world`);
 
   const x1 = Math.round(viewport.width * .40), y1 = Math.round(viewport.height * .50);
   const x2 = Math.round(viewport.width * .61), y2 = Math.round(viewport.height * .43);
-  await page.mouse.move(x1, y1); await page.mouse.down(); await page.mouse.move(x2, y2, { steps: 12 }); await page.mouse.up();
-  await page.waitForTimeout(500);
+  await page.mouse.move(x1, y1); await page.mouse.down(); await page.mouse.move(x2, y2, { steps: 14 }); await page.mouse.up();
+  await page.waitForTimeout(650);
   await shot(page, `${kind}-${viewportName}-dragged`);
 
-  await clickVisible(page, 'Toggle Menu');
-  await page.waitForTimeout(950);
+  await clickMenu(page);
+  await page.waitForTimeout(1150);
   await shot(page, `${kind}-${viewportName}-menu`);
   await context.close();
 }
@@ -80,7 +110,7 @@ await browser.close();
 
 const report = { generatedAt: new Date().toISOString(), comparisons: {} };
 for (const viewportName of Object.keys(viewports)) {
-  for (const state of ['intro','world','dragged','menu']) {
+  for (const state of ['loader-1s','loader-2_5s','ready','world','dragged','menu']) {
     const r = path.join(OUT, `reference-${viewportName}-${state}.png`), c = path.join(OUT, `clone-${viewportName}-${state}.png`);
     const key = `${viewportName}-${state}`;
     report.comparisons[key] = fs.existsSync(r) && fs.existsSync(c)
