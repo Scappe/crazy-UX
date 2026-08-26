@@ -1,0 +1,1 @@
+Reference raster frames are generated from the current live interaction states. GitHub Actions remain disabled to preserve account minutes.
