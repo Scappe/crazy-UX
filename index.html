@@ -1,133 +1,79 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#f0dfdb">
-  <meta name="description" content="Independent motion and interaction study.">
-  <title>Unseen — Interaction Study</title>
-  <link rel="stylesheet" href="./styles.css">
-  <style>
-    .intro{display:block;background:#f0dfdb;color:#111}
-    .intro>.wordmark,.intro>.intro-copy{transition:opacity .45s ease}
-    .intro-letters{position:absolute;left:var(--pad);right:var(--pad);top:50%;transform:translateY(-50%) scaleX(.955);transition:opacity .62s ease,transform .8s var(--ease)}
-    .intro-progress,.intro-loading{transition:opacity .35s ease}
-    .intro-ready{position:absolute;left:50%;top:44%;width:min(300px,76vw);transform:translate(-50%,-48%) scale(.96);text-align:center;opacity:0;pointer-events:none;transition:opacity .65s ease .08s,transform .9s var(--ease-out) .08s}
-    .intro-ready .wordmark{font-size:7px;letter-spacing:-.035em;margin:9px 0 6px}
-    .intro-ready p{font-size:6.4px;line-height:1.14;margin:0 auto 15px;max-width:205px;letter-spacing:-.02em}
-    .eyes{display:flex;align-items:center;justify-content:center;margin:0 auto;width:64px;height:47px}
-    .eye{position:relative;width:31px;height:42px;border:1.6px solid #111;border-radius:52% 48% 52% 48%;background:#fff;overflow:hidden}
-    .eye:first-child{transform:rotate(-7deg) translateX(2px)}.eye:last-child{transform:rotate(7deg) translateX(-2px)}
-    .eye i{position:absolute;width:15px;height:23px;border-radius:50%;background:#050505;left:50%;top:50%;transform:translate(-38%,-48%)}
-    .eye i:after{content:"";position:absolute;width:4.5px;height:7px;border-radius:50%;background:#fff;left:3px;top:3px}
-    .intro-enter{display:inline-flex;align-items:center;gap:5px;background:#fff;color:#111;border:0;box-shadow:0 2px 7px rgba(0,0,0,.075);min-width:0;padding:6px 12px;font-size:7px}
-    .intro-silent{position:absolute;left:50%;bottom:12.6%;transform:translateX(-50%);font-size:6.4px;text-transform:uppercase;padding-bottom:2px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .5s ease .22s}
-    .intro.is-loaded>.wordmark,.intro.is-loaded>.intro-copy,.intro.is-loaded .intro-letters,.intro.is-loaded .intro-progress,.intro.is-loaded .intro-loading{opacity:0;pointer-events:none}
-    .intro.is-loaded .intro-letters{transform:translateY(-50%) scaleX(.955) scale(.97)}
-    .intro.is-loaded .intro-ready{opacity:1;pointer-events:auto;transform:translate(-50%,-50%) scale(1)}
-    .intro.is-loaded .intro-silent{opacity:1;pointer-events:auto}
-    .hold-overlay{pointer-events:none}
-    @media(max-width:800px){.intro-letters{left:18px;right:18px;width:auto;margin:0;font-size:18.5vw}.intro-ready{top:44%;width:82vw}.intro-silent{bottom:10.5%}.intro>.intro-copy{margin-top:58px}.eyes{transform:scale(.94)}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#efded9">
+<title>Unseen Studio®</title>
+<link rel="stylesheet" href="./styles.css">
 </head>
-<body>
-  <div class="grain" aria-hidden="true"></div>
-  <div class="cursor" id="cursor" aria-hidden="true"></div>
+<body class="loading">
+  <div class="stage" id="stage">
+    <section class="loader" id="loader" aria-label="Introduction">
+      <picture class="loader-frame lf1"><source media="(max-width:700px)" srcset="./assets/loader-mobile-1.webp"><img src="./assets/loader-desktop-1.webp" alt=""></picture>
+      <picture class="loader-frame lf2"><source media="(max-width:700px)" srcset="./assets/loader-mobile-2.webp"><img src="./assets/loader-desktop-2.webp" alt=""></picture>
+      <picture class="loader-frame lfready"><source media="(max-width:700px)" srcset="./assets/ready-mobile.webp"><img src="./assets/ready-desktop.webp" alt=""></picture>
+      <button class="entry-hot" id="enter" aria-label="Enter"></button>
+      <button class="silent-hot" id="silent" aria-label="Enter without audio"></button>
+    </section>
 
-  <section class="intro" id="intro" aria-label="Introduction">
-    <div class="wordmark">Unseen Studio®</div>
-    <div class="intro-copy">
-      <p>A brand, digital and motion studio creating<br>refreshingly unexpected ideas and striking visuals<br>that help bold brands cut through the noise.</p>
-    </div>
-
-    <div class="intro-letters" aria-hidden="true">
-      <span>U</span><span>N</span><span>S</span><span>E</span><span>E</span><span>N</span>
-    </div>
-    <div class="intro-progress" aria-hidden="true"><i></i></div>
-    <div class="intro-loading">(Loading)</div>
-
-    <div class="intro-ready">
-      <div class="eyes" aria-hidden="true"><span class="eye"><i></i></span><span class="eye"><i></i></span></div>
-      <div class="wordmark">UNSEEN STUDIO®</div>
-      <p>A brand, digital and motion studio creating<br>refreshingly unexpected ideas and striking visuals<br>that help bold brands cut through the noise.</p>
-      <button class="pill intro-enter" id="enter">Enter <span>↘</span></button>
-    </div>
-    <button class="text-link intro-silent" id="silent">Enter without audio</button>
-  </section>
-
-  <main class="app" id="app" aria-hidden="true">
-    <header class="topbar">
-      <button class="wordmark mag" data-view="home">Unseen Studio®</button>
-      <div class="topbar-right">
-        <div class="contact-strip">
-          <a class="mag" href="mailto:projects@unseen.co">⮡ projects@unseen.co</a>
-          <a class="mag" href="tel:+441179226892">⮡ (+44) 0117 922 6892</a>
+    <main class="site" id="site" aria-hidden="true">
+      <section class="home view active" data-view="home">
+        <div class="world" id="world">
+          <picture class="world-frame wa"><source media="(max-width:700px)" srcset="./assets/world-mobile-a.webp"><img src="./assets/world-desktop-a.webp" alt=""></picture>
+          <picture class="world-frame wb"><source media="(max-width:700px)" srcset="./assets/world-mobile-b.webp"><img src="./assets/world-desktop-b.webp" alt=""></picture>
+          <div class="water-glint"></div>
+          <div class="ripple" id="ripple"></div>
+          <button class="hot menu-hot" data-menu aria-label="Toggle Menu"></button>
+          <button class="hot projects-hot" data-go="projects" aria-label="View our work"></button>
+          <button class="hot nav-projects" data-go="projects" aria-label="Projects"></button>
+          <button class="hot nav-contact" data-go="contact" aria-label="Contact"></button>
+          <button class="hot wrapped-hot" aria-label="Our 2025 Wrapped"></button>
+          <button class="hot sound-hot" id="sound" aria-label="Toggle Sound"></button>
         </div>
-        <button class="menu-toggle mag" id="menuToggle" aria-expanded="false" aria-controls="menu">
-          <span>Toggle Menu</span><i></i><i></i>
-        </button>
-      </div>
-    </header>
+      </section>
 
-    <div class="side-hold micro">Click &amp; Hold</div>
-    <div class="side-copy micro">Unseen Studio®</div>
-
-    <button class="sound-toggle mag micro" id="soundToggle" aria-pressed="true">
-      <span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
-      <span>Toggle Sound</span>
-    </button>
-
-    <section class="world view is-active" data-name="home" aria-label="Home">
-      <canvas id="worldCanvas"></canvas>
-      <div class="world-vignette"></div>
-      <div class="world-title"><em>UN</em>SEEN</div>
-
-      <div class="orbit" id="orbit">
-        <article class="card card-a" data-title="Soft Machines" data-type="Digital"><div class="card-art art-a"></div><span class="card-index">01</span></article>
-        <article class="card card-b" data-title="Otherworld" data-type="Motion"><div class="card-art art-b"></div><span class="card-index">02</span></article>
-        <article class="card card-c" data-title="Form State" data-type="Branding"><div class="card-art art-c"><strong>FORM<br>STATE</strong></div><span class="card-index">03</span></article>
-        <article class="card card-d" data-title="Future Matter" data-type="Experiment"><div class="card-art art-d"></div><span class="card-index">04</span></article>
-        <article class="card card-e" data-title="No Signal" data-type="Digital"><div class="card-art art-e"><strong>NO<br>SIGNAL</strong></div><span class="card-index">05</span></article>
-      </div>
-
-      <div class="drag-hint micro" id="dragHint"><span class="drag-icon" aria-hidden="true"><i></i></span><p>Drag to explore our world</p></div>
-      <button class="work-link mag" data-view="projects">View our work ↗</button>
-      <div class="card-meta" id="cardMeta"><small>Selected project</small><h2>Soft Machines</h2><span>Digital</span></div>
-    </section>
-
-    <section class="projects view" data-name="projects" aria-label="Selected Projects">
-      <div class="projects-head">
-        <p class="micro">Selected Projects</p><h1>Projects</h1>
-        <div class="filters" aria-label="Filter projects">
-          <button class="is-active" data-filter="all">All</button><button data-filter="branding">Branding</button><button data-filter="digital">Digital</button><button data-filter="motion">Motion</button><button data-filter="experiment">Experiment</button>
+      <section class="projects view" data-view="projects">
+        <header class="topbar"><button class="logo" data-go="home">unseen<span>studio</span><sup>®</sup></button><nav><button data-go="home">Index</button><button class="active">Projects</button><button data-go="contact">Contact</button><button class="round-menu" data-menu>••</button></nav></header>
+        <div class="projects-intro"><h1>Projects</h1><div><p>Looking for a creative partner for your project?</p><a href="mailto:projects@unseen.co">projects@unseen.co</a></div></div>
+        <div class="filters"><button class="active" data-filter="all">All <sup>20</sup></button><button data-filter="branding">Branding <sup>5</sup></button><button data-filter="digital">Digital <sup>20</sup></button><button data-filter="motion">Motion <sup>5</sup></button><button data-filter="experiment">Experiment <sup>6</sup></button></div>
+        <div class="project-grid">
+          <article data-kind="digital motion"><img src="https://unseen.co/wp-content/uploads/2026/06/hubtown_unseen-1024x538.jpg" alt=""><div><strong>Hubtown</strong><span>Digital / Motion</span></div></article>
+          <article data-kind="digital"><img src="https://unseen.co/wp-content/uploads/2026/03/Frame-29-1024x538.jpg" alt=""><div><strong>Polycam</strong><span>Digital</span></div></article>
+          <article data-kind="digital motion"><img src="https://unseen.co/wp-content/uploads/2026/03/poly-1024x538.jpg" alt=""><div><strong>Symphony of Vines</strong><span>Digital / Motion</span></div></article>
+          <article data-kind="branding motion"><img src="https://unseen.co/wp-content/uploads/2025/08/sov_1-1024x538.jpg" alt=""><div><strong>KIKK Festival</strong><span>Branding / Motion</span></div></article>
+          <article data-kind="digital"><img src="https://unseen.co/wp-content/uploads/2025/08/klook2-1024x538.jpg" alt=""><div><strong>Klook</strong><span>Digital</span></div></article>
+          <article data-kind="digital experiment"><img src="https://unseen.co/wp-content/uploads/2025/08/desktop-1024x768.png" alt=""><div><strong>Digital Experiments</strong><span>Digital / Experiment</span></div></article>
+          <article data-kind="branding digital"><img src="https://unseen.co/wp-content/uploads/2025/08/Frame-1000004051-1024x538.jpg" alt=""><div><strong>Selected Work</strong><span>Branding / Digital</span></div></article>
+          <article data-kind="digital"><img src="https://unseen.co/wp-content/uploads/2025/08/25res-1024x538.jpg" alt=""><div><strong>Twenty Five</strong><span>Digital</span></div></article>
         </div>
-      </div>
-      <div class="project-list">
-        <a href="#" class="project-row" data-kind="digital"><span class="index">01</span><span class="name">Soft Machines</span><span class="kind">Digital</span><span class="arrow">↗</span><i class="preview preview-a"></i></a>
-        <a href="#" class="project-row" data-kind="motion"><span class="index">02</span><span class="name">Otherworld</span><span class="kind">Motion</span><span class="arrow">↗</span><i class="preview preview-b"></i></a>
-        <a href="#" class="project-row" data-kind="branding"><span class="index">03</span><span class="name">Form State</span><span class="kind">Branding</span><span class="arrow">↗</span><i class="preview preview-c"></i></a>
-        <a href="#" class="project-row" data-kind="experiment"><span class="index">04</span><span class="name">Future Matter</span><span class="kind">Experiment</span><span class="arrow">↗</span><i class="preview preview-d"></i></a>
-        <a href="#" class="project-row" data-kind="digital"><span class="index">05</span><span class="name">No Signal</span><span class="kind">Digital</span><span class="arrow">↗</span><i class="preview preview-e"></i></a>
-      </div>
-      <button class="back-link mag" data-view="home">↙ Back to world</button>
-    </section>
+      </section>
 
-    <section class="contact view" data-name="contact" aria-label="Contact">
-      <div class="contact-grid"></div>
-      <div class="contact-main"><span class="micro">Say hello</span><h1><em>we look forward</em><br>to hearing from you</h1><div class="contact-actions"><a class="pill primary mag" href="mailto:projects@unseen.co">New Business ↗</a><a class="pill secondary mag" href="mailto:hello@unseen.co">General ↗</a></div></div>
-      <div class="contact-details"><div><small>Bristol</small><p>35a Colston Avenue<br>Bristol, BS1 4TT</p></div><div><small>London</small><p>90 Paul Street<br>London, EC2A 4NE</p></div></div>
-    </section>
+      <section class="contact view" data-view="contact">
+        <div class="contact-bg"></div>
+        <header class="topbar"><button class="logo" data-go="home">unseen<span>studio</span><sup>®</sup></button><nav><button data-go="home">Index</button><button data-go="projects">Projects</button><button class="active">Contact</button><button class="round-menu" data-menu>••</button></nav></header>
+        <div class="contact-copy"><h1>Say hello</h1><div class="contact-tag">WE LOOK FORWARD<br>TO HEARING FROM YOU</div><div class="contact-actions"><a href="mailto:projects@unseen.co">New Business ↘</a><a href="mailto:hello@unseen.co">General ↘</a></div><div class="contact-lines"><a href="mailto:projects@unseen.co">projects@unseen.co</a><a href="tel:+441179226892">(+44) 0117 922 6892</a></div></div>
+        <button class="world-dot" data-go="home">◎</button>
+      </section>
 
-    <nav class="menu" id="menu" aria-hidden="true">
-      <div class="menu-grid" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-      <div class="menu-inner"><span class="micro">Explore</span><button class="menu-link" data-view="home"><sup>01</sup><span>Index</span></button><button class="menu-link" data-view="projects"><sup>02</sup><span>Projects</span></button><button class="menu-link" data-view="contact"><sup>03</sup><span>Contact</span></button><button class="menu-link" data-view="home"><sup>04</sup><span>World</span></button></div>
-      <div class="menu-foot micro"><span>Brand · Digital · Motion</span><span>Interaction study</span></div>
-    </nav>
+      <nav class="menu" id="menu" aria-hidden="true">
+        <picture class="menu-mobile-shot"><img src="./assets/menu-mobile.webp" alt=""></picture>
+        <div class="menu-desktop-panel">
+          <div class="menu-links">
+            <button class="active" data-go="home"><small>01</small><span>Index</span><i></i></button>
+            <button data-go="projects"><small>02</small><span>Projects</span></button>
+            <button data-go="contact"><small>03</small><span>Contact</span></button>
+            <button data-go="home"><small>04</small><span>World</span><b>◎</b></button>
+          </div>
+          <div class="menu-footer"><div><a href="mailto:projects@unseen.co">projects@unseen.co</a><a href="tel:+441179226892">(+44) 0117 922 6892</a></div><div class="social"><a>TWITTER</a><a>INSTAGRAM</a><a>LINKEDIN</a><a>DRIBBBLE</a><a>BEHANCE</a></div></div>
+        </div>
+        <button class="menu-close" id="menuClose" aria-label="Close menu">×</button>
+        <button class="mobile-menu-link ml1" data-go="home"></button><button class="mobile-menu-link ml2" data-go="projects"></button><button class="mobile-menu-link ml3" data-go="contact"></button><button class="mobile-menu-link ml4" data-go="home"></button>
+      </nav>
 
-    <div class="hold-overlay" id="holdOverlay" aria-hidden="true"><div class="hold-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="46"></circle><circle class="progress" cx="50" cy="50" r="46"></circle></svg><span>Hold</span></div><p class="hold-copy micro">Keep holding to enter</p></div>
-  </main>
-
-  <script>setTimeout(()=>document.getElementById('intro')?.classList.add('is-loaded'),1580);</script>
-  <script src="./app.js" defer></script>
+      <div class="cursor" id="cursor"><i></i><span>Click &amp; Hold</span></div>
+    </main>
+  </div>
+<script src="./app.js"></script>
 </body>
 </html>
