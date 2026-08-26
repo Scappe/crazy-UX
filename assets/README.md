@@ -1,0 +1,1 @@
+Reference-derived raster states used by the interaction study. Automatic GitHub Actions visual-audit runs are disabled; validation is performed from previously captured reference artifacts and local analysis.
