@@ -10,18 +10,22 @@
 <body class="loading">
   <div class="stage" id="stage">
     <section class="loader" id="loader" aria-label="Introduction">
-      <picture class="loader-frame lf1"><source media="(max-width:700px)" srcset="./assets/loader-mobile-1.webp"><img src="./assets/loader-desktop-1.webp" alt=""></picture>
-      <picture class="loader-frame lf2"><source media="(max-width:700px)" srcset="./assets/loader-mobile-2.webp"><img src="./assets/loader-desktop-2.webp" alt=""></picture>
-      <picture class="loader-frame lfready"><source media="(max-width:700px)" srcset="./assets/ready-mobile.webp"><img src="./assets/ready-desktop.webp" alt=""></picture>
-      <button class="entry-hot" id="enter" aria-label="Enter"></button>
-      <button class="silent-hot" id="silent" aria-label="Enter without audio"></button>
+      <div class="loader-word" aria-hidden="true"><span>U</span><span>N</span><span>S</span><span>E</span><span>E</span><span>N</span></div>
+      <div class="loader-ready">
+        <div class="eyes" aria-hidden="true"><i class="eye eye-l"><b></b></i><i class="eye eye-r"><b></b></i></div>
+        <div class="loader-logo">UNSEEN STUDIO®</div>
+        <p>A brand, digital and motion studio creating<br>refreshingly unexpected ideas and striking visuals<br>that help bold brands cut through the noise.</p>
+        <button class="enter-visible" id="enter">Enter <span>↘</span></button>
+      </div>
+      <button class="silent-visible" id="silent">ENTER WITHOUT AUDIO</button>
+      <div class="loading-label">(Loading)</div>
     </section>
 
     <main class="site" id="site" aria-hidden="true">
       <section class="home view active" data-view="home">
         <div class="world" id="world">
           <picture class="world-frame wa"><source media="(max-width:700px)" srcset="./assets/world-mobile-a.webp"><img src="./assets/world-desktop-a.webp" alt=""></picture>
-          <picture class="world-frame wb"><source media="(max-width:700px)" srcset="./assets/world-mobile-b.webp"><img src="./assets/world-desktop-b.webp" alt=""></picture>
+          <picture class="world-frame wb"><source media="(max-width:700px)" srcset="./assets/world-mobile-b.webp"><img src="./assets/world-desktop-a.webp" alt=""></picture>
           <div class="water-glint"></div>
           <div class="ripple" id="ripple"></div>
           <button class="hot menu-hot" data-menu aria-label="Toggle Menu"></button>
