@@ -71,8 +71,15 @@ async function auditOne(browser, kind, viewportName) {
   if (!enter) enter = await findInteractableText(page, 'Enter', 3500);
   await shot(page, `${kind}-${viewportName}-ready`);
 
-  if (enter) await enter.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
-  else fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] entry control not interactable\n`);
+  if (enter) {
+    await enter.click({ force: true, noWaitAfter: true, timeout: 3500 }).catch(() => {});
+  } else {
+    // The live site's WebGL overlay can make its visible entry control fail DOM
+    // hit-testing in desktop Chromium. Click the visually measured centre as a
+    // deterministic fallback so the audit still reaches the actual home scene.
+    await page.mouse.click(Math.round(viewport.width * .5), Math.round(viewport.height * .577));
+    fs.appendFileSync(path.join(OUT, 'errors.log'), `[${kind}/${viewportName}] used coordinate entry fallback\n`);
+  }
 
   await page.waitForTimeout(2800);
   await shot(page, `${kind}-${viewportName}-world`);
